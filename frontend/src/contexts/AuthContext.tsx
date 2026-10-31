@@ -77,10 +77,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const isAdmin = userProfile?.role === 'Admin';
   const isEquipmentManager = userProfile?.role === 'EquipmentManager';
 
-  const canManageDepartment = (departmentId: string): boolean => {
+  // Người quản lý thiết bị CNTT tại BV quản lý toàn diện thiết bị tại các khoa phòng
+  const canManageDepartment = (_departmentId: string): boolean => {
     if (!userProfile) return false;
-    if (userProfile.role === 'Admin') return true;
-    return userProfile.departmentIds?.includes(departmentId) || false;
+    return true; // Cả Admin và EquipmentManager đều quản lý thiết bị CNTT toàn viện
   };
 
   const loginWithEmail = async (email: string, pass: string) => {
@@ -99,9 +99,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const newProf: UserProfile = {
           id: cred.user.uid,
           email: cred.user.email || email,
-          displayName: cred.user.displayName || (isDefaultAdmin ? 'Quản trị viên Hệ thống (Admin)' : 'Cán bộ Quản lý Thiết bị'),
+          displayName: cred.user.displayName || (isDefaultAdmin ? 'Quản trị viên Hệ thống (Admin)' : 'Người Quản lý Thiết bị CNTT Bệnh viện'),
           role: isDefaultAdmin ? 'Admin' : 'EquipmentManager',
-          departmentIds: isDefaultAdmin ? [] : ['DEP-KCB', 'DEP-PHCN'],
+          departmentIds: [],
           isActive: true,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -120,22 +120,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const loginAsDemo = async (demoRole: UserRole, specificDeptId?: string) => {
+  const loginAsDemo = async (demoRole: UserRole) => {
     setLoading(true);
     try {
-      let selected: UserProfile;
-      if (demoRole === 'Admin') {
-        selected = INITIAL_USERS[0];
-      } else {
-        selected = specificDeptId
-          ? {
-              ...INITIAL_USERS[1],
-              displayName: `Quản lý Thiết bị (${specificDeptId})`,
-              departmentIds: [specificDeptId],
-            }
-          : INITIAL_USERS[1];
-      }
-
+      const selected: UserProfile = demoRole === 'Admin' ? INITIAL_USERS[0] : INITIAL_USERS[1];
       setUserProfile(selected);
       localStorage.setItem('hosp_current_user_profile', JSON.stringify(selected));
       await logActivity(

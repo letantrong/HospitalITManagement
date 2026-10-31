@@ -130,12 +130,12 @@ export const DashboardPage: React.FC = () => {
       >
         <Box sx={{ textAlign: 'left' }}>
           <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a', textAlign: 'left', lineHeight: 1.2 }}>
-            {isAdmin ? 'BẢNG ĐIỀU KHIỂN QUẢN TRỊ BỆNH VIỆN' : 'BẢNG ĐIỀU KHIỂN QUẢN LÝ THIẾT BỊ KHOA PHÒNG'}
+            {isAdmin ? 'BẢNG ĐIỀU KHIỂN QUẢN TRỊ BỆNH VIỆN' : 'BẢNG ĐIỀU KHIỂN QUẢN LÝ THIẾT BỊ CNTT'}
           </Typography>
           <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5, textAlign: 'left' }}>
             {isAdmin
-              ? 'Giám sát toàn diện hạ tầng công nghệ thông tin tại Bệnh viện Phục hồi chức năng'
-              : `Phạm vi giám sát: ${userProfile?.departmentIds?.join(', ') || 'Khoa được phân công'}`}
+              ? 'Giám sát toàn diện hạ tầng công nghệ thông tin và mạng IPAM tại Bệnh viện Phục hồi chức năng'
+              : 'Theo dõi, vận hành và kiểm kê trang thiết bị CNTT tại Bệnh viện Phục hồi chức năng'}
           </Typography>
         </Box>
 
@@ -149,16 +149,14 @@ export const DashboardPage: React.FC = () => {
           >
             Quét mã QR kiểm tra
           </Button>
-          {isAdmin && (
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={() => navigate('/devices')}
-              sx={{ fontWeight: 600, px: 2.5, py: 1 }}
-            >
-              Quản lý thiết bị
-            </Button>
-          )}
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => navigate('/devices')}
+            sx={{ fontWeight: 600, px: 2.5, py: 1 }}
+          >
+            Quản lý thiết bị
+          </Button>
         </Box>
       </Paper>
 

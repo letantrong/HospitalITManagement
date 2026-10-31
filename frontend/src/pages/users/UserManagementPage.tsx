@@ -17,42 +17,31 @@ import {
   DialogActions,
   TextField,
   MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
-  OutlinedInput,
-  SelectChangeEvent,
 } from '@mui/material';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotification } from '../../contexts/NotificationContext';
-import { userService, departmentService } from '../../services/dataStorageService';
+import { userService } from '../../services/dataStorageService';
 import { logActivity } from '../../services/activityLogService';
-import type { UserProfile, Department } from '../../types';
+import type { UserProfile } from '../../types';
 
 export const UserManagementPage: React.FC = () => {
-  const { userProfile, isAdmin } = useAuth();
+  const { userProfile } = useAuth();
   const { showSuccess, showError } = useNotification();
 
   const [users, setUsers] = useState<UserProfile[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Dialog Phân quyền
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [role, setRole] = useState<'Admin' | 'EquipmentManager'>('EquipmentManager');
-  const [selectedDeptIds, setSelectedDeptIds] = useState<string[]>([]);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [uList, dList] = await Promise.all([
-        userService.getAll(),
-        departmentService.getAll(),
-      ]);
+      const uList = await userService.getAll();
       setUsers(uList);
-      setDepartments(dList);
     } finally {
       setLoading(false);
     }
@@ -65,23 +54,17 @@ export const UserManagementPage: React.FC = () => {
   const handleOpenAssign = (user: UserProfile) => {
     setSelectedUser(user);
     setRole(user.role);
-    setSelectedDeptIds(user.departmentIds || []);
-  };
-
-  const handleDeptChange = (event: SelectChangeEvent<string[]>) => {
-    const value = event.target.value;
-    setSelectedDeptIds(typeof value === 'string' ? value.split(',') : value);
   };
 
   const handleSaveAssignment = async () => {
     if (!selectedUser) return;
     try {
-      await userService.updateRoleAndDepartments(selectedUser.id, role, selectedDeptIds);
+      await userService.updateRoleAndDepartments(selectedUser.id, role, []);
       await logActivity(
         userProfile,
         'UPDATE_DEVICE',
         'USER',
-        `Admin đã cập nhật vai trò ${role} cho ${selectedUser.displayName} với ${selectedDeptIds.length} khoa phòng`,
+        `Admin đã cập nhật vai trò ${role} cho ${selectedUser.displayName}`,
         selectedUser.id
       );
 
@@ -127,7 +110,7 @@ export const UserManagementPage: React.FC = () => {
                   <TableCell>
                     <Chip
                       icon={isUserAdmin ? <AdminPanelSettingsIcon /> : <ManageAccountsIcon />}
-                      label={isUserAdmin ? 'Admin (Toàn viện)' : 'EquipmentManager'}
+                      label={isUserAdmin ? 'Admin (Toàn viện)' : 'Quản lý Thiết bị CNTT'}
                       color={isUserAdmin ? 'primary' : 'secondary'}
                       size="small"
                       sx={{ fontWeight: 700 }}
@@ -136,25 +119,12 @@ export const UserManagementPage: React.FC = () => {
                   <TableCell>
                     {isUserAdmin ? (
                       <Typography variant="caption" sx={{ color: '#0284c7', fontWeight: 600 }}>
-                        Toàn bộ các Khoa / Phòng ban trong bệnh viện
+                        Toàn bộ các Khoa / Phòng ban trong bệnh viện (Toàn quyền)
                       </Typography>
-                    ) : u.departmentIds?.length > 0 ? (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {u.departmentIds.map((deptId) => {
-                          const dept = departments.find((d) => d.id === deptId);
-                          return (
-                            <Chip
-                              key={deptId}
-                              label={dept ? `${dept.name} (${dept.code})` : deptId}
-                              size="small"
-                              variant="outlined"
-                              color="secondary"
-                            />
-                          );
-                        })}
-                      </Box>
                     ) : (
-                      <span style={{ color: '#94a3b8' }}>Chưa được phân công khoa nào</span>
+                      <Typography variant="caption" sx={{ color: '#059669', fontWeight: 600 }}>
+                        Quản lý toàn bộ thiết bị CNTT tại các Khoa / Phòng ban trong bệnh viện
+                      </Typography>
                     )}
                   </TableCell>
                   <TableCell sx={{ textAlign: 'center' }}>
@@ -186,48 +156,27 @@ export const UserManagementPage: React.FC = () => {
 
           <TextField
             select
-            label="Chọn Vai trò (Chỉ 2 vai trò chuẩn) *"
+            label="Chọn Vai trò (2 vai trò hệ thống) *"
             size="small"
             fullWidth
             value={role}
             onChange={(e) => setRole(e.target.value as any)}
             sx={{ mb: 2.5 }}
           >
-            <MenuItem value="Admin">Admin (Quản trị viên toàn hệ thống & Toàn bệnh viện)</MenuItem>
-            <MenuItem value="EquipmentManager">EquipmentManager (Quản lý thiết bị khoa được chỉ định)</MenuItem>
+            <MenuItem value="Admin">Quản trị viên Hệ thống (Admin - Toàn quyền)</MenuItem>
+            <MenuItem value="EquipmentManager">Người Quản lý Thiết bị CNTT Bệnh viện</MenuItem>
           </TextField>
 
-          {role === 'EquipmentManager' && (
-            <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-              <InputLabel>Khoa / Phòng ban được phân công phụ trách *</InputLabel>
-              <Select
-                multiple
-                value={selectedDeptIds}
-                onChange={handleDeptChange}
-                input={<OutlinedInput label="Khoa / Phòng ban được phân công phụ trách *" />}
-                renderValue={(selected) => (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {selected.map((val) => {
-                      const d = departments.find((item) => item.id === val);
-                      return <Chip key={val} label={d?.code || val} size="small" />;
-                    })}
-                  </Box>
-                )}
-              >
-                {departments.map((dept) => (
-                  <MenuItem key={dept.id} value={dept.id}>
-                    {dept.name} ({dept.code})
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
-
-          {role === 'EquipmentManager' && (
-            <Typography variant="caption" sx={{ color: '#64748b', display: 'block' }}>
-              * Lưu ý bảo mật: Cán bộ chỉ được phép xem, cập nhật thiết bị, kiểm kê và báo hỏng trong phạm vi các phòng ban đã được tick chọn ở trên.
+          <Box sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0', mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: role === 'Admin' ? '#0284c7' : '#059669', mb: 0.5 }}>
+              {role === 'Admin' ? 'Quyền hạn Quản trị viên (Admin):' : 'Quyền hạn Người Quản lý Thiết bị CNTT:'}
             </Typography>
-          )}
+            <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.85rem' }}>
+              {role === 'Admin'
+                ? 'Toàn quyền cấu hình dải mạng IPAM, quản lý danh mục khoa phòng, phê duyệt điều chuyển tài sản, tạo đợt kiểm kê và quản trị tài khoản người dùng.'
+                : 'Quản lý hồ sơ thiết bị CNTT toàn viện, thực hiện cấp phát IP tĩnh, lập phiếu sự cố & bảo trì, quét mã QR kiểm kê tại các khoa phòng và đề xuất điều chuyển thiết bị.'}
+            </Typography>
+          </Box>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setSelectedUser(null)}>Hủy</Button>

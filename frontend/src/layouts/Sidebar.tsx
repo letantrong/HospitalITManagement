@@ -147,19 +147,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onClose }) => {
         </Box>
       </Box>
 
-      {/* Box hiển thị phạm vi quản lý của Manager */}
-      {!isAdmin && userProfile?.departmentIds && userProfile.departmentIds.length > 0 && (
-        <Box sx={{ m: 1.5, p: 1.5, bgcolor: '#ecfdf5', borderRadius: 2, border: '1px solid #a7f3d0', flexShrink: 0 }}>
-          <Typography variant="caption" sx={{ fontWeight: 700, color: '#047857', display: 'block', mb: 0.5 }}>
-            PHẠM VI QUẢN LÝ ĐƯỢC GIAO:
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {userProfile.departmentIds.map((deptId) => (
-              <Chip key={deptId} label={deptId} size="small" color="secondary" sx={{ fontSize: '0.7rem', fontWeight: 700 }} />
-            ))}
-          </Box>
-        </Box>
-      )}
+      {/* Box hiển thị vai trò tài khoản chuẩn */}
+      <Box sx={{ m: 1.5, p: 1.5, bgcolor: isAdmin ? '#f0f9ff' : '#ecfdf5', borderRadius: 2, border: `1px solid ${isAdmin ? '#bae6fd' : '#a7f3d0'}`, flexShrink: 0 }}>
+        <Typography variant="caption" sx={{ fontWeight: 800, color: isAdmin ? '#0284c7' : '#047857', display: 'block', letterSpacing: 0.5 }}>
+          {isAdmin ? 'QUẢN TRỊ VIÊN HỆ THỐNG' : 'QUẢN LÝ THIẾT BỊ CNTT'}
+        </Typography>
+        <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.7rem', display: 'block' }}>
+          {isAdmin ? 'Toàn quyền quản trị & Mạng IPAM' : 'Quản lý thiết bị CNTT Bệnh viện'}
+        </Typography>
+      </Box>
 
       {/* Danh sách Menu Items có scrollbar thanh mảnh */}
       <Box

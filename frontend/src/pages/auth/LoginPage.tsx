@@ -247,16 +247,16 @@ export const LoginPage: React.FC = () => {
                     Quản trị viên Hệ thống (Admin)
                   </Typography>
                   <Typography variant="caption" sx={{ color: '#64748b', display: 'block' }}>
-                    Toàn quyền: Cấp phát IP tĩnh, Quản trị mạng, Phân quyền
+                    Toàn quyền: Quản trị mạng IPAM, phê duyệt điều chuyển, phân quyền
                   </Typography>
                 </Box>
               </Box>
               <Button size="small" variant="contained" color="primary" sx={{ fontSize: '0.75rem', fontWeight: 700 }}>
-                Vào ngay
+                Đăng nhập
               </Button>
             </Paper>
 
-            {/* Nút 2: EquipmentManager Khoa Khám Bệnh */}
+            {/* Nút 2: Người Quản lý Thiết bị CNTT Bệnh viện */}
             <Paper
               variant="outlined"
               sx={{
@@ -266,57 +266,26 @@ export const LoginPage: React.FC = () => {
                 justifyContent: 'space-between',
                 borderRadius: 2,
                 cursor: 'pointer',
-                borderColor: '#e2e8f0',
+                borderColor: '#a7f3d0',
+                bgcolor: '#ecfdf5',
                 transition: 'all 0.2s ease',
-                '&:hover': { bgcolor: '#f8fafc', borderColor: '#059669', transform: 'translateY(-1px)' },
+                '&:hover': { bgcolor: '#d1fae5', borderColor: '#059669', transform: 'translateY(-1px)' },
               }}
-              onClick={() => handleQuickDemo('EquipmentManager', 'DEP-KCB')}
+              onClick={() => handleQuickDemo('EquipmentManager')}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <ManageAccountsIcon sx={{ color: '#059669', fontSize: 28 }} />
                 <Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                    Quản lý Khoa Khám Bệnh & Dược
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#047857' }}>
+                    Người Quản lý Thiết bị CNTT Bệnh viện
                   </Typography>
                   <Typography variant="caption" sx={{ color: '#64748b', display: 'block' }}>
-                    Phạm vi: DEP-KCB (Quét QR, Xem IP, Báo hỏng thiết bị)
+                    Quản lý thiết bị toàn viện, quét mã QR, sự cố bảo trì, cấp phát IP tĩnh
                   </Typography>
                 </Box>
               </Box>
-              <Button size="small" variant="outlined" color="success" sx={{ fontSize: '0.75rem', fontWeight: 700 }}>
-                Chọn
-              </Button>
-            </Paper>
-
-            {/* Nút 3: EquipmentManager Khoa Phục Hồi Chức Năng */}
-            <Paper
-              variant="outlined"
-              sx={{
-                p: 1.5,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                borderRadius: 2,
-                cursor: 'pointer',
-                borderColor: '#e2e8f0',
-                transition: 'all 0.2s ease',
-                '&:hover': { bgcolor: '#f8fafc', borderColor: '#059669', transform: 'translateY(-1px)' },
-              }}
-              onClick={() => handleQuickDemo('EquipmentManager', 'DEP-PHCN')}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <ManageAccountsIcon sx={{ color: '#059669', fontSize: 28 }} />
-                <Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                    Quản lý Khoa Phục hồi chức năng
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#64748b', display: 'block' }}>
-                    Phạm vi: DEP-PHCN (Giám sát & Quét mã QR chuyên khoa)
-                  </Typography>
-                </Box>
-              </Box>
-              <Button size="small" variant="outlined" color="success" sx={{ fontSize: '0.75rem', fontWeight: 700 }}>
-                Chọn
+              <Button size="small" variant="contained" color="success" sx={{ fontSize: '0.75rem', fontWeight: 700 }}>
+                Đăng nhập
               </Button>
             </Paper>
           </Stack>

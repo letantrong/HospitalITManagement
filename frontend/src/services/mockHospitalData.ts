@@ -387,29 +387,20 @@ export const INITIAL_DEVICES: Device[] = [
 export const INITIAL_USERS: UserProfile[] = [
   {
     id: 'USER-ADMIN',
-    email: 'admin@bvphcndt.vn',
+    email: 'admin@bvphcn.vn',
     displayName: 'Quản trị viên Hệ thống (Admin)',
     phoneNumber: '0277.3851.999',
     role: 'Admin',
-    departmentIds: [], // Admin quản lý toàn viện
+    departmentIds: [], // Toàn viện
     isActive: true,
   },
   {
-    id: 'USER-MANAGER-KCB',
-    email: 'manager.kcb@bvphcndt.vn',
-    displayName: 'ThS. Nguyễn Văn Hải (Phụ trách KCB & Dược)',
-    phoneNumber: '0919.123.456',
+    id: 'USER-IT-MANAGER',
+    email: 'itmanager@bvphcn.vn',
+    displayName: 'Người Quản lý Thiết bị CNTT Bệnh viện',
+    phoneNumber: '0277.3851.888',
     role: 'EquipmentManager',
-    departmentIds: ['DEP-KCB', 'DEP-DUOC'], // Được phân công quản lý Khoa Khám Bệnh và Khoa Dược
-    isActive: true,
-  },
-  {
-    id: 'USER-MANAGER-PHCN',
-    email: 'manager.phcn@bvphcndt.vn',
-    displayName: 'CN. Lê Hoàng Long (Phụ trách PHCN)',
-    phoneNumber: '0988.765.432',
-    role: 'EquipmentManager',
-    departmentIds: ['DEP-PHCN'], // Phụ trách Khoa Phục hồi chức năng
+    departmentIds: [], // Quản lý thiết bị CNTT toàn viện
     isActive: true,
   },
 ];
@@ -478,8 +469,8 @@ export const INITIAL_TRANSFER_RECORDS: TransferRecord[] = [
     toLocationName: 'Quầy Cấp phát thuốc BHYT',
     reason: 'Tăng cường máy in đơn thuốc phục vụ quầy cấp phát ngoại trú',
     status: 'Completed',
-    requestedBy: 'USER-MANAGER-KCB',
-    requestedByName: 'ThS. Nguyễn Văn Hải',
+    requestedBy: 'USER-IT-MANAGER',
+    requestedByName: 'Người Quản lý Thiết bị CNTT',
     requestedAt: '2026-09-20',
     approvedBy: 'USER-ADMIN',
     approvedByName: 'Quản trị viên Hệ thống (Admin)',

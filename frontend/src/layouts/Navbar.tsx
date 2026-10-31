@@ -40,10 +40,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
     setAnchorEl(null);
   };
 
-  const handleSwitchTo = async (newRole: 'Admin' | 'EquipmentManager', deptId?: string) => {
+  const handleSwitchTo = async (newRole: 'Admin' | 'EquipmentManager') => {
     handleCloseSwitchRole();
-    await loginAsDemo(newRole, deptId);
-    showSuccess(`Đã chuyển sang vai trò: ${newRole === 'Admin' ? 'Quản trị viên (Admin)' : 'Quản lý thiết bị (EquipmentManager)'}`);
+    await loginAsDemo(newRole);
+    showSuccess(`Đã chuyển sang vai trò: ${newRole === 'Admin' ? 'Quản trị viên Hệ thống (Admin)' : 'Người Quản lý Thiết bị CNTT Bệnh viện'}`);
   };
 
   const handleLogout = async () => {
@@ -118,22 +118,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
           <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleCloseSwitchRole}>
             <MenuItem onClick={() => handleSwitchTo('Admin')}>
               <AdminPanelSettingsIcon sx={{ mr: 1.5, color: '#0284c7' }} />
-              Quản trị viên (Admin - Toàn viện)
+              Quản trị viên Hệ thống (Admin)
             </MenuItem>
-            <MenuItem onClick={() => handleSwitchTo('EquipmentManager', 'DEP-KCB')}>
+            <MenuItem onClick={() => handleSwitchTo('EquipmentManager')}>
               <ManageAccountsIcon sx={{ mr: 1.5, color: '#059669' }} />
-              Quản lý Khoa Khám Bệnh & Dược
-            </MenuItem>
-            <MenuItem onClick={() => handleSwitchTo('EquipmentManager', 'DEP-PHCN')}>
-              <ManageAccountsIcon sx={{ mr: 1.5, color: '#059669' }} />
-              Quản lý Khoa Phục hồi chức năng
+              Người Quản lý Thiết bị CNTT Bệnh viện
             </MenuItem>
           </Menu>
 
           {/* Role Badge */}
           <Chip
             icon={isAdmin ? <AdminPanelSettingsIcon /> : <ManageAccountsIcon />}
-            label={isAdmin ? 'ADMIN' : 'EQUIPMENT MANAGER'}
+            label={isAdmin ? 'ADMIN' : 'QUẢN LÝ THIẾT BỊ CNTT'}
             color={isAdmin ? 'primary' : 'secondary'}
             size="small"
             sx={{ fontWeight: 800, letterSpacing: 0.5 }}

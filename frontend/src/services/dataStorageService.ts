@@ -238,10 +238,7 @@ export const deviceService = {
       console.warn('Firestore offline, dùng local devices', e);
     }
 
-    // Phân quyền: EquipmentManager chỉ thấy thiết bị thuộc khoa được phân công
-    if (user && user.role === 'EquipmentManager' && user.departmentIds?.length > 0) {
-      return list.filter((d) => user.departmentIds.includes(d.departmentId));
-    }
+    // Cả Admin và Người Quản lý Thiết bị CNTT Bệnh viện đều quản lý thiết bị toàn viện
     return list;
   },
 
