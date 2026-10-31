@@ -1,4 +1,4 @@
-# HospitalITManagement - Bệnh viện Phục hồi chức năng Đồng Tháp
+# HospitalITManagement - Bệnh viện Phục hồi chức năng
 
 Hệ thống quản lý trang thiết bị Công nghệ thông tin chuyên nghiệp, hiện đại xây dựng trên nền tảng **ReactJS + TypeScript + Vite + Material UI (MUI)** và **Google Firebase (Authentication, Cloud Firestore, Storage, Cloud Functions, Security Rules)**.
 
