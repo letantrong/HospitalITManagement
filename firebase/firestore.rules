@@ -1,0 +1,263 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions kiểm tra xác thực và vai trò
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Tra cứu dữ liệu user hiện tại từ Firestore
+    function currentUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    // Kiểm tra có phải Admin hay không (Custom Claim hoặc Firestore user role)
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'Admin' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && currentUserData().role == 'Admin')
+      );
+    }
+
+    // Kiểm tra có phải EquipmentManager quản lý phòng ban cụ thể hay không
+    function isManagerForDepartment(deptId) {
+      return isAuthenticated() && (
+        isAdmin() ||
+        (
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          currentUserData().role == 'EquipmentManager' &&
+          deptId in currentUserData().departmentIds
+        )
+      );
+    }
+
+    // ==========================================
+    // 1. USERS COLLECTION
+    // ==========================================
+    match /users/{userId} {
+      // Cho phép người dùng đọc thông tin chính mình hoặc Admin đọc mọi người
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      
+      // Chỉ Admin mới được tạo mới, cập nhật role/phòng ban hoặc xóa user
+      // Người dùng chỉ được sửa thông tin cá nhân cơ bản (displayName, avatarUrl, phoneNumber)
+      allow create: if isAdmin();
+      allow update: if isAdmin() || (
+        isAuthenticated() && request.auth.uid == userId &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'departmentIds', 'isActive'])
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 2. DEPARTMENTS COLLECTION
+    // ==========================================
+    match /departments/{deptId} {
+      // Mọi người dùng đã xác thực đều được xem danh sách khoa phòng để hiển thị
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // ==========================================
+    // 3. DEVICE CATEGORIES
+    // ==========================================
+    match /deviceCategories/{catId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // ==========================================
+    // 4. LOCATIONS
+    // ==========================================
+    match /locations/{locId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // ==========================================
+    // 5. DEVICES
+    // ==========================================
+    match /devices/{deviceId} {
+      // Cho phép Admin xem toàn bộ, EquipmentManager xem thiết bị thuộc khoa mình quản lý
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        resource.data.departmentId in currentUserData().departmentIds
+      );
+
+      // Tạo mới: Admin có toàn quyền; Manager chỉ được tạo thiết bị gán vào khoa mình quản lý
+      allow create: if isAuthenticated() && (
+        isAdmin() ||
+        (
+          currentUserData().role == 'EquipmentManager' &&
+          request.resource.data.departmentId in currentUserData().departmentIds
+        )
+      );
+
+      // Cập nhật: Admin toàn quyền; Manager chỉ cập nhật thiết bị khoa mình và không được tự ý đổi departmentId sang khoa khác
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        (
+          resource.data.departmentId in currentUserData().departmentIds &&
+          request.resource.data.departmentId in currentUserData().departmentIds
+        )
+      );
+
+      // Xóa: Chỉ Admin mới có quyền xóa thiết bị
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 6. QR CODES
+    // ==========================================
+    match /qrCodes/{qrId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 7. INVENTORY SESSIONS
+    // ==========================================
+    match /inventorySessions/{sessionId} {
+      // Mọi tài khoản xác thực đều có thể đọc các đợt kiểm kê đang hoạt động
+      allow read: if isAuthenticated();
+      // Chỉ Admin được tạo hoặc kết thúc đợt kiểm kê
+      allow write: if isAdmin();
+    }
+
+    // ==========================================
+    // 8. INVENTORY ITEMS (SNAPSHOT & QUÉT THỰC TẾ)
+    // ==========================================
+    match /inventoryItems/{itemId} {
+      allow read: if isAuthenticated();
+      // Cho phép update khi thực hiện quét QR kiểm kê thiết bị
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        resource.data.expectedDepartmentId in currentUserData().departmentIds ||
+        request.resource.data.actualDepartmentId in currentUserData().departmentIds
+      );
+      allow create, delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 9. MAINTENANCE RECORDS (BẢO TRÌ & SỬA CHỮA)
+    // ==========================================
+    match /maintenanceRecords/{recordId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        resource.data.departmentId in currentUserData().departmentIds
+      );
+      // Tạo phiếu báo hỏng: Admin hoặc Manager khoa đó
+      allow create: if isAuthenticated() && (
+        isAdmin() ||
+        request.resource.data.departmentId in currentUserData().departmentIds
+      );
+      // Cập nhật tiến độ / nghiệm thu: Admin toàn quyền; Manager cập nhật phiếu khoa mình
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        resource.data.departmentId in currentUserData().departmentIds
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 10. TRANSFER RECORDS (ĐIỀU CHUYỂN KHOA PHÒNG)
+    // ==========================================
+    match /transferRecords/{transferId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        resource.data.fromDepartmentId in currentUserData().departmentIds ||
+        resource.data.toDepartmentId in currentUserData().departmentIds
+      );
+      // Tạo phiếu điều chuyển: Manager từ khoa mình hoặc Admin
+      allow create: if isAuthenticated() && (
+        isAdmin() ||
+        request.resource.data.fromDepartmentId in currentUserData().departmentIds
+      );
+      // Chỉ Admin mới được phê duyệt / hoàn tất hoặc hủy phiếu
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 11. ACTIVITY LOGS (AUDIT TRAIL BẤT BIẾN)
+    // ==========================================
+    match /activityLogs/{logId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        resource.data.userId == request.auth.uid
+      );
+      // Chỉ cho phép append (create), TUYỆT ĐỐI KHÔNG sửa hoặc xóa
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+
+    // ==========================================
+    // 12. SYSTEM SETTINGS
+    // ==========================================
+    match /systemSettings/{settingId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // ==========================================
+    // 13. IPAM: IP NETWORKS (DẢI MẠNG)
+    // ==========================================
+    match /ipNetworks/{networkId} {
+      // Admin xem tất cả; EquipmentManager chỉ xem dải mạng có liên kết với phòng ban của mình
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        resource.data.departmentIds.hasAny(currentUserData().departmentIds)
+      );
+      // Chỉ Admin mới được tạo mới, chỉnh sửa hoặc ngừng sử dụng dải mạng
+      allow write: if isAdmin();
+    }
+
+    // ==========================================
+    // 14. IPAM: IP ADDRESSES (ĐỊA CHỈ IP)
+    // ==========================================
+    match /ipAddresses/{ipId} {
+      // Admin xem toàn bộ; Manager chỉ được xem các IP đã cấp phát (Assigned) cho thiết bị thuộc khoa mình
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        (
+          resource.data.status == 'Assigned' &&
+          resource.data.departmentIds.hasAny(currentUserData().departmentIds)
+        )
+      );
+      // Chỉ Admin mới được can thiệp vào địa chỉ IP (reserve, block, unblock...)
+      allow write: if isAdmin();
+    }
+
+    // ==========================================
+    // 15. IPAM: IP ASSIGNMENT HISTORY (LỊCH SỬ CẤP PHÁT BẤT BIẾN)
+    // ==========================================
+    match /ipAssignmentHistory/{histId} {
+      // Admin xem toàn bộ; Manager chỉ xem lịch sử của thiết bị thuộc phòng ban mình quản lý
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        resource.data.departmentId in currentUserData().departmentIds
+      );
+      // Chỉ Admin được ghi nhận lịch sử; TUYỆT ĐỐI CẤM SỬA HOẶC XÓA LỊCH SỬ
+      allow create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // ==========================================
+    // 16. IPAM: IP EXCLUSIONS (IP LOẠI TRỪ)
+    // ==========================================
+    match /ipExclusions/{exId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // ==========================================
+    // 17. IPAM: IP AUDIT LOGS (NHẬT KÝ KIỂM TOÁN IP)
+    // ==========================================
+    match /ipAuditLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+  }
+}

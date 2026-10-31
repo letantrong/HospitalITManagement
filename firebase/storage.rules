@@ -1,0 +1,42 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Ảnh thiết bị
+    match /devices/{deviceId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() &&
+        request.resource.size < 5 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+    }
+
+    // Tài liệu chứng từ bảo trì, sửa chữa, hóa đơn
+    match /maintenance/{recordId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() &&
+        request.resource.size < 10 * 1024 * 1024 &&
+        (request.resource.contentType.matches('image/.*') || request.resource.contentType == 'application/pdf');
+    }
+
+    // Biên bản điều chuyển
+    match /transfers/{transferId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() &&
+        request.resource.size < 10 * 1024 * 1024 &&
+        (request.resource.contentType.matches('image/.*') || request.resource.contentType == 'application/pdf');
+    }
+
+    // Avatar cán bộ
+    match /avatars/{userId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() &&
+        request.auth.uid == userId &&
+        request.resource.size < 2 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+    }
+  }
+}
