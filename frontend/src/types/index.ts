@@ -1,6 +1,6 @@
 /**
  * ĐỊNH NGHĨA TYPESCRIPT CHO TOÀN BỘ HỆ THỐNG QUẢN LÝ THIẾT BỊ CNTT
- * Bệnh viện Phục hồi chức năng Đồng Tháp
+ * Bệnh viện Phục hồi chức năng
  */
 
 // 1. Phân quyền người dùng (chỉ 2 vai trò)

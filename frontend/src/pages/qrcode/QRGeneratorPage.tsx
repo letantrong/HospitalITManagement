@@ -48,7 +48,7 @@ export const QRGeneratorPage: React.FC = () => {
         const enhancedList: QRDeviceItem[] = await Promise.all(
           devList.map(async (d) => {
             const qrPayload = JSON.stringify({
-              hospital: 'BVPHCN_DongThap',
+              hospital: 'BVPHCN',
               deviceCode: d.deviceCode,
               token: d.qrCodeToken,
               id: d.id,
@@ -102,7 +102,7 @@ export const QRGeneratorPage: React.FC = () => {
             <img src="${dev.qrDataUrl}" />
           </div>
           <div class="info-box">
-            <div class="hosp-name">BV PHCN ĐỒNG THÁP</div>
+            <div class="hosp-name">BV PHỤC HỒI CHỨC NĂNG</div>
             <div class="dev-code">${dev.deviceCode}</div>
             <div class="dev-name">${dev.name}</div>
             <div>Khoa: ${dev.departmentName}</div>
@@ -117,7 +117,7 @@ export const QRGeneratorPage: React.FC = () => {
     printWin.document.write(`
       <html>
         <head>
-          <title>In Tem Nhãn QR Hàng Loạt - BV PHCN Đồng Tháp</title>
+          <title>In Tem Nhãn QR Hàng Loạt - BV Phục hồi chức năng</title>
           <style>
             @page { size: A4; margin: 10mm; }
             body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fff; }
@@ -158,13 +158,27 @@ export const QRGeneratorPage: React.FC = () => {
 
   return (
     <Box>
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a' }}>
+      <Paper
+        elevation={0}
+        sx={{
+          mb: 3,
+          p: { xs: 2, sm: 2.5 },
+          borderRadius: 2.5,
+          border: '1px solid #e2e8f0',
+          bgcolor: '#ffffff',
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', md: 'center' },
+          gap: 2,
+        }}
+      >
+        <Box sx={{ textAlign: 'left' }}>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a', textAlign: 'left', lineHeight: 1.2 }}>
             TẠO & IN TEM MÃ QR HÀNG LOẠT
           </Typography>
-          <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5 }}>
-            Chuẩn tem nhãn dán thiết bị y tế tại Bệnh viện Phục hồi chức năng Đồng Tháp
+          <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5, textAlign: 'left' }}>
+            Chuẩn tem nhãn dán thiết bị y tế tại Bệnh viện Phục hồi chức năng
           </Typography>
         </Box>
 
@@ -173,11 +187,11 @@ export const QRGeneratorPage: React.FC = () => {
           color="primary"
           startIcon={<PrintIcon />}
           onClick={handlePrintBatch}
-          sx={{ fontWeight: 700 }}
+          sx={{ fontWeight: 700, px: 2.5, py: 1 }}
         >
           IN TEM ĐÃ CHỌN (TRANG IN A4)
         </Button>
-      </Box>
+      </Paper>
 
       {/* Bộ lọc khoa phòng & Chọn tất cả */}
       <Card sx={{ mb: 3 }}>
@@ -255,7 +269,7 @@ export const QRGeneratorPage: React.FC = () => {
 
               <Box sx={{ overflow: 'hidden' }}>
                 <Typography variant="caption" sx={{ color: '#0284c7', fontWeight: 800, display: 'block' }}>
-                  BV PHCN ĐỒNG THÁP
+                  BV PHỤC HỒI CHỨC NĂNG
                 </Typography>
                 <Typography variant="subtitle2" noWrap sx={{ fontWeight: 800, color: '#0f172a' }}>
                   {dev.deviceCode}

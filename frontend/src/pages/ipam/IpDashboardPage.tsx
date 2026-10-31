@@ -81,18 +81,32 @@ export const IpDashboardPage: React.FC = () => {
 
   return (
     <Box>
-      {/* Tiêu đề & Tác vụ nhanh */}
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a' }}>
+      {/* Tiêu đề & Tác vụ nhanh - Bố cục cân đối */}
+      <Paper
+        elevation={0}
+        sx={{
+          mb: 3,
+          p: { xs: 2, sm: 2.5 },
+          borderRadius: 2.5,
+          border: '1px solid #e2e8f0',
+          bgcolor: '#ffffff',
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', md: 'center' },
+          gap: 2,
+        }}
+      >
+        <Box sx={{ textAlign: 'left' }}>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a', textAlign: 'left', lineHeight: 1.2 }}>
             TỔNG QUAN QUẢN TRỊ ĐỊA CHỈ IP (IPAM DASHBOARD)
           </Typography>
-          <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5 }}>
-            Quản lý tập trung các dải mạng nội bộ, theo dõi dung lượng và cấp phát IP tĩnh tại BV Phục hồi chức năng Đồng Tháp
+          <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5, textAlign: 'left' }}>
+            Quản lý tập trung các dải mạng nội bộ, theo dõi dung lượng và cấp phát IP tĩnh tại Bệnh viện Phục hồi chức năng
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
           {isAdmin && (
             <>
               <Button
@@ -100,7 +114,7 @@ export const IpDashboardPage: React.FC = () => {
                 color="primary"
                 startIcon={<AddCircleIcon />}
                 onClick={() => navigate('/ipam/networks')}
-                sx={{ fontWeight: 600 }}
+                sx={{ fontWeight: 600, px: 2.5, py: 1 }}
               >
                 Khai báo Dải mạng
               </Button>
@@ -109,14 +123,14 @@ export const IpDashboardPage: React.FC = () => {
                 color="primary"
                 startIcon={<LanIcon />}
                 onClick={() => navigate('/ipam/assignment')}
-                sx={{ fontWeight: 700 }}
+                sx={{ fontWeight: 700, px: 2.5, py: 1 }}
               >
                 CẤP PHÁT IP TĨNH
               </Button>
             </>
           )}
         </Box>
-      </Box>
+      </Paper>
 
       {/* 5 Thẻ Thống kê Trạng thái IP (KPI Cards) */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(5, 1fr)' }, gap: 2, mb: 3 }}>
@@ -245,16 +259,17 @@ export const IpDashboardPage: React.FC = () => {
                     dataKey="value"
                     nameKey="name"
                     cx="50%"
-                    cy="50%"
-                    outerRadius={85}
-                    label={({ name, percent }: any) => `${name.split(' ')[0]}: ${(percent * 100).toFixed(0)}%`}
+                    cy="45%"
+                    innerRadius={50}
+                    outerRadius={75}
+                    paddingAngle={3}
                   >
                     {pieData.map((entry) => (
                       <Cell key={entry.name} fill={PIE_STATUS_COLORS[entry.name] || '#94a3b8'} />
                     ))}
                   </Pie>
-                  <Legend />
-                  <ChartTooltip />
+                  <ChartTooltip formatter={(val: any, name: any) => [`${val} IP`, name]} />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.8rem' }} />
                 </PieChart>
               </ResponsiveContainer>
             </Box>

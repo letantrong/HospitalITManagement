@@ -22,6 +22,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  TablePagination,
 } from '@mui/material';
 import Grid from '../../components/common/AppGrid';
 import AddIcon from '@mui/icons-material/Add';
@@ -66,6 +67,10 @@ export const DeviceListPage: React.FC = () => {
   const [selectedDept, setSelectedDept] = useState('ALL');
   const [selectedCat, setSelectedCat] = useState('ALL');
   const [selectedStatus, setSelectedStatus] = useState('ALL');
+
+  // Pagination
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Dialog State
   const [formOpen, setFormOpen] = useState(false);
@@ -304,11 +309,13 @@ export const DeviceListPage: React.FC = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredDevices.map((dev, idx) => {
+              filteredDevices
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((dev, idx) => {
                 const statusMeta = getDeviceStatusMeta(dev.status);
                 return (
                   <TableRow key={dev.id} hover>
-                    <TableCell sx={{ color: '#64748b', fontWeight: 500 }}>{idx + 1}</TableCell>
+                    <TableCell sx={{ color: '#64748b', fontWeight: 500 }}>{page * rowsPerPage + idx + 1}</TableCell>
                     <TableCell>
                       <Typography
                         variant="body2"
@@ -375,6 +382,21 @@ export const DeviceListPage: React.FC = () => {
             )}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25, 50]}
+          component="div"
+          count={filteredDevices.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={(_, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+          labelRowsPerPage="Số dòng mỗi trang:"
+          labelDisplayedRows={({ from, to, count }) => `${from}–${to} trên tổng số ${count !== -1 ? count : `hơn ${to}`}`}
+          sx={{ borderTop: '1px solid #e2e8f0' }}
+        />
       </TableContainer>
 
       {/* Form Dialog Thêm / Sửa */}

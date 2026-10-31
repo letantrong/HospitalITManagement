@@ -6,7 +6,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Toolbar,
   Divider,
   Box,
   Typography,
@@ -31,9 +30,10 @@ import LanIcon from '@mui/icons-material/Lan';
 import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
 import TimelineIcon from '@mui/icons-material/Timeline';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import { useAuth } from '../contexts/AuthContext';
 
-const DRAWER_WIDTH = 270;
+export const DRAWER_WIDTH = 280;
 
 interface SidebarProps {
   mobileOpen: boolean;
@@ -43,7 +43,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onClose }) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { role, isAdmin, userProfile } = useAuth();
+  const { isAdmin, userProfile } = useAuth();
 
   const handleNavigate = (path: string) => {
     navigate(path);
@@ -102,35 +102,94 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onClose }) => {
   }
 
   const drawerContent = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Toolbar sx={{ display: { xs: 'block', md: 'none' } }} />
-      
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#ffffff' }}>
+      {/* Brand Logo & Tên Bệnh viện trên đầu Sidebar */}
+      <Box
+        sx={{
+          height: 64,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5,
+          px: 2.5,
+          borderBottom: '1px solid #e2e8f0',
+          bgcolor: '#ffffff',
+          flexShrink: 0,
+        }}
+      >
+        <Box
+          sx={{
+            width: 38,
+            height: 38,
+            borderRadius: 2,
+            bgcolor: '#e0f2fe',
+            color: '#0284c7',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <LocalHospitalIcon sx={{ fontSize: 24 }} />
+        </Box>
+        <Box sx={{ overflow: 'hidden' }}>
+          <Typography
+            variant="subtitle2"
+            sx={{ fontWeight: 800, color: '#0284c7', lineHeight: 1.2, whiteSpace: 'nowrap' }}
+          >
+            BV PHỤC HỒI CHỨC NĂNG
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{ color: '#64748b', fontSize: '0.72rem', display: 'block', whiteSpace: 'nowrap', fontWeight: 500 }}
+          >
+            Quản lý Thiết bị CNTT & IPAM
+          </Typography>
+        </Box>
+      </Box>
+
       {/* Box hiển thị phạm vi quản lý của Manager */}
-      {!isAdmin && userProfile?.departmentIds && (
-        <Box sx={{ m: 2, p: 1.5, bgcolor: '#ecfdf5', borderRadius: 2, border: '1px solid #a7f3d0' }}>
-          <Typography variant="caption" sx={{ fontWeight: 700, color: '#047857', display: 'block' }}>
+      {!isAdmin && userProfile?.departmentIds && userProfile.departmentIds.length > 0 && (
+        <Box sx={{ m: 1.5, p: 1.5, bgcolor: '#ecfdf5', borderRadius: 2, border: '1px solid #a7f3d0', flexShrink: 0 }}>
+          <Typography variant="caption" sx={{ fontWeight: 700, color: '#047857', display: 'block', mb: 0.5 }}>
             PHẠM VI QUẢN LÝ ĐƯỢC GIAO:
           </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
             {userProfile.departmentIds.map((deptId) => (
-              <Chip key={deptId} label={deptId} size="small" color="secondary" sx={{ fontSize: '0.7rem' }} />
+              <Chip key={deptId} label={deptId} size="small" color="secondary" sx={{ fontSize: '0.7rem', fontWeight: 700 }} />
             ))}
           </Box>
         </Box>
       )}
 
-      <Box sx={{ flexGrow: 1, overflowY: 'auto', px: 1.5, py: 1 }}>
+      {/* Danh sách Menu Items có scrollbar thanh mảnh */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          overflowY: 'auto',
+          px: 1.5,
+          py: 1,
+          scrollbarWidth: 'thin',
+          '&::-webkit-scrollbar': {
+            width: '4px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: '#e2e8f0',
+            borderRadius: '4px',
+          },
+        }}
+      >
         {navItems.map((group, gIdx) => (
           <Box key={gIdx} sx={{ mb: 2 }}>
             <Typography
               variant="caption"
               sx={{
-                px: 2,
+                px: 1.5,
                 py: 0.5,
                 display: 'block',
                 fontWeight: 700,
                 color: '#94a3b8',
                 letterSpacing: 0.8,
+                fontSize: '0.7rem',
               }}
             >
               {group.group}
@@ -145,7 +204,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onClose }) => {
                       selected={isActive}
                       sx={{
                         borderRadius: 2,
-                        py: 1,
+                        py: 0.9,
                         px: 1.5,
                         color: isActive ? '#0284c7' : '#475569',
                         bgcolor: isActive ? '#f0f9ff' : 'transparent',
@@ -156,7 +215,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onClose }) => {
                     >
                       <ListItemIcon
                         sx={{
-                          minWidth: 38,
+                          minWidth: 36,
                           color: isActive ? '#0284c7' : '#64748b',
                         }}
                       >
@@ -167,8 +226,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onClose }) => {
                         slotProps={{
                           primary: {
                             sx: {
-                              fontSize: '0.875rem',
-                              fontWeight: isActive ? 600 : 500,
+                              fontSize: '0.85rem',
+                              fontWeight: isActive ? 700 : 500,
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
                             },
                           },
                         }}
@@ -178,18 +240,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onClose }) => {
                 );
               })}
             </List>
-            {gIdx < navItems.length - 1 && <Divider sx={{ my: 1.5, borderColor: '#f1f5f9' }} />}
+            {gIdx < navItems.length - 1 && <Divider sx={{ my: 1, borderColor: '#f1f5f9' }} />}
           </Box>
         ))}
       </Box>
 
       {/* Footer bản quyền bệnh viện */}
-      <Box sx={{ p: 2, bgcolor: '#f8fafc', borderTop: '1px solid #f1f5f9', textAlign: 'center' }}>
-        <Typography variant="caption" sx={{ color: '#94a3b8', display: 'block' }}>
-          BV Phục hồi chức năng Đồng Tháp
+      <Box sx={{ p: 1.5, bgcolor: '#f8fafc', borderTop: '1px solid #f1f5f9', textAlign: 'center', flexShrink: 0 }}>
+        <Typography variant="caption" sx={{ color: '#94a3b8', display: 'block', fontWeight: 600 }}>
+          BV Phục hồi chức năng
         </Typography>
         <Typography variant="caption" sx={{ color: '#cbd5e1', fontSize: '0.65rem' }}>
-          Phiên bản 2.0 - Firebase Edition
+          Hệ thống Quản lý Thiết bị CNTT & IPAM
         </Typography>
       </Box>
     </Box>
@@ -197,7 +259,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onClose }) => {
 
   return (
     <Box component="nav" sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}>
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer (Trượt ra khi bấm MenuIcon) */}
       <Drawer
         variant="temporary"
         open={mobileOpen}
@@ -205,13 +267,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onClose }) => {
         ModalProps={{ keepMounted: true }}
         sx={{
           display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH },
+          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH, border: 'none' },
         }}
       >
         {drawerContent}
       </Drawer>
 
-      {/* Desktop Permanent Drawer */}
+      {/* Desktop Permanent Drawer (Cố định toàn chiều cao màn hình) */}
       <Drawer
         variant="permanent"
         sx={{
@@ -221,11 +283,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onClose }) => {
             width: DRAWER_WIDTH,
             borderRight: '1px solid #e2e8f0',
             bgcolor: '#ffffff',
+            height: '100vh',
+            top: 0,
+            left: 0,
+            overflow: 'hidden',
           },
         }}
         open
       >
-        <Toolbar />
         {drawerContent}
       </Drawer>
     </Box>

@@ -14,7 +14,7 @@ import type {
 } from '../types';
 
 /**
- * DỮ LIỆU BAN ĐẦU CHUẨN - BỆNH VIỆN PHỤC HỒI CHỨC NĂNG ĐỒNG THÁP
+ * DỮ LIỆU BAN ĐẦU CHUẨN - BỆNH VIỆN PHỤC HỒI CHỨC NĂNG
  */
 
 export const INITIAL_DEPARTMENTS: Department[] = [
@@ -490,8 +490,8 @@ export const INITIAL_TRANSFER_RECORDS: TransferRecord[] = [
 
 export const INITIAL_SYSTEM_SETTINGS: SystemSettings = {
   id: 'general',
-  hospitalName: 'Bệnh viện Phục hồi chức năng Đồng Tháp',
-  address: 'Số 01, Đường Lê Duẩn, Phường Mỹ Phú, TP. Cao Lãnh, Đồng Tháp',
+  hospitalName: 'Bệnh viện Phục hồi chức năng',
+  address: 'Số 01, Đường Lê Duẩn, Phường Mỹ Phú, TP. Cao Lãnh',
   contactPhone: '0277.3851.101',
   itHotline: '0277.3851.999 (Đội CNTT Bệnh viện)',
   defaultCurrency: 'VND',

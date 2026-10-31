@@ -12,10 +12,17 @@ import {
   CircularProgress,
   Stack,
   Paper,
+  InputAdornment,
+  IconButton,
+  Chip,
 } from '@mui/material';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import LoginIcon from '@mui/icons-material/Login';
+import SecurityIcon from '@mui/icons-material/Security';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotification } from '../../contexts/NotificationContext';
 
@@ -26,6 +33,7 @@ export const LoginPage: React.FC = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -40,12 +48,20 @@ export const LoginPage: React.FC = () => {
     setErrorMsg('');
     try {
       await loginWithEmail(email, password);
-      showSuccess('Đăng nhập thành công!');
+      showSuccess('Đăng nhập thành công vào Hệ thống HospitalITManagement!');
       navigate('/');
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.message || 'Đăng nhập không thành công. Vui lòng kiểm tra lại tài khoản.');
-      showError('Đăng nhập thất bại!');
+      let msg = 'Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản hoặc mật khẩu.';
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+        msg = 'Email hoặc mật khẩu không chính xác. Bạn có thể sử dụng các nút Đăng nhập nhanh bên dưới.';
+      } else if (err.code === 'auth/wrong-password') {
+        msg = 'Mật khẩu không chính xác.';
+      } else if (err.code === 'auth/too-many-requests') {
+        msg = 'Bạn đã thử đăng nhập sai quá nhiều lần. Vui lòng thử lại sau vài phút.';
+      }
+      setErrorMsg(msg);
+      showError(msg);
     } finally {
       setLoading(false);
     }
@@ -55,7 +71,13 @@ export const LoginPage: React.FC = () => {
     setLoading(true);
     try {
       await loginAsDemo(role, deptId);
-      showSuccess(`Đã đăng nhập với tư cách: ${role === 'Admin' ? 'Quản trị viên (Admin)' : 'Quản lý thiết bị Khoa Khám Bệnh'}`);
+      const title =
+        role === 'Admin'
+          ? 'Quản trị viên Bệnh viện (Admin)'
+          : deptId === 'DEP-KCB'
+          ? 'Quản lý Khoa Khám Bệnh & Dược'
+          : 'Quản lý Khoa Phục hồi chức năng';
+      showSuccess(`Đã đăng nhập thành công với vai trò: ${title}`);
       navigate('/');
     } finally {
       setLoading(false);
@@ -69,48 +91,78 @@ export const LoginPage: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        bgcolor: '#f1f5f9',
-        p: 2,
-        backgroundImage: 'radial-gradient(#e2e8f0 1px, transparent 1px)',
-        backgroundSize: '24px 24px',
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0369a1 100%)',
+        p: { xs: 2, sm: 3 },
       }}
     >
-      <Card sx={{ maxWidth: 460, width: '100%', borderRadius: 3, boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}>
-        <Box sx={{ p: 3, textAlign: 'center', bgcolor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+      <Card
+        sx={{
+          maxWidth: 480,
+          width: '100%',
+          borderRadius: 3,
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+          overflow: 'hidden',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+        }}
+      >
+        {/* Banner đầu trang */}
+        <Box
+          sx={{
+            p: 3.5,
+            textAlign: 'center',
+            background: 'linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%)',
+            borderBottom: '1px solid #bae6fd',
+          }}
+        >
           <Box
             sx={{
-              width: 56,
-              height: 56,
+              width: 64,
+              height: 64,
               borderRadius: '50%',
-              bgcolor: '#e0f2fe',
-              color: '#0284c7',
+              bgcolor: '#0284c7',
+              color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               mx: 'auto',
               mb: 1.5,
+              boxShadow: '0 8px 16px rgba(2, 132, 199, 0.3)',
             }}
           >
-            <LocalHospitalIcon sx={{ fontSize: 36 }} />
+            <LocalHospitalIcon sx={{ fontSize: 40 }} />
           </Box>
-          <Typography variant="h6" sx={{ fontWeight: 800, color: '#0284c7', letterSpacing: -0.5 }}>
-            BỆNH VIỆN PHỤC HỒI CHỨC NĂNG ĐỒNG THÁP
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 900,
+              color: '#0369a1',
+              letterSpacing: -0.5,
+              fontSize: { xs: '1.1rem', sm: '1.25rem' },
+            }}
+          >
+            BỆNH VIỆN PHỤC HỒI CHỨC NĂNG
           </Typography>
-          <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5, fontWeight: 500 }}>
-            Hệ thống Quản lý Thiết bị CNTT & Kiểm kê QR
+          <Typography variant="body2" sx={{ color: '#475569', mt: 0.5, fontWeight: 600 }}>
+            Hệ thống Quản lý Thiết bị CNTT & Cấp phát IP Tĩnh (IPAM)
           </Typography>
+          <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center', gap: 1 }}>
+            <Chip label="Phiên bản 2.0" size="small" sx={{ bgcolor: '#0284c7', color: '#fff', fontSize: '0.7rem', fontWeight: 700 }} />
+            <Chip label="Firebase Cloud Sync" size="small" variant="outlined" color="primary" sx={{ fontSize: '0.7rem' }} />
+          </Box>
         </Box>
 
-        <CardContent sx={{ p: 3 }}>
+        <CardContent sx={{ p: { xs: 2.5, sm: 3.5 } }}>
           {errorMsg && (
-            <Alert severity="error" sx={{ mb: 2.5 }}>
+            <Alert severity="error" sx={{ mb: 2.5, borderRadius: 2 }}>
               {errorMsg}
             </Alert>
           )}
 
           <form onSubmit={handleLogin}>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748b', mb: 0.5, display: 'block' }}>
+              EMAIL CÁN BỘ BỆNH VIỆN
+            </Typography>
             <TextField
-              label="Email Cán bộ Bệnh viện"
               type="email"
               fullWidth
               size="small"
@@ -120,34 +172,58 @@ export const LoginPage: React.FC = () => {
               sx={{ mb: 2 }}
             />
 
+            <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748b', mb: 0.5, display: 'block' }}>
+              MẬT KHẨU
+            </Typography>
             <TextField
-              label="Mật khẩu"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               fullWidth
               size="small"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="Nhập mật khẩu"
               sx={{ mb: 2.5 }}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
             />
 
             <Button
               type="submit"
               variant="contained"
               fullWidth
+              size="large"
               disabled={loading}
-              sx={{ py: 1.2, fontWeight: 700 }}
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <LoginIcon />}
+              sx={{
+                py: 1.3,
+                fontWeight: 800,
+                fontSize: '0.95rem',
+                borderRadius: 2,
+                bgcolor: '#0284c7',
+                '&:hover': { bgcolor: '#0369a1' },
+              }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'ĐĂNG NHẬP VỚI FIREBASE AUTH'}
+              {loading ? 'Đang xác thực...' : 'ĐĂNG NHẬP HỆ THỐNG'}
             </Button>
           </form>
 
           <Divider sx={{ my: 3 }}>
-            <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 600 }}>
-              HOẶC KIỂM THỬ NHANH VAI TRÒ
+            <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 700, letterSpacing: 0.5 }}>
+              HOẶC ĐĂNG NHẬP NHANH MỘT CHẠM (1-CLICK)
             </Typography>
           </Divider>
 
           <Stack spacing={1.5}>
+            {/* Nút 1: Admin Toàn Viện */}
             <Paper
               variant="outlined"
               sx={{
@@ -157,26 +233,30 @@ export const LoginPage: React.FC = () => {
                 justifyContent: 'space-between',
                 borderRadius: 2,
                 cursor: 'pointer',
-                '&:hover': { bgcolor: '#f0f9ff', borderColor: '#38bdf8' },
+                borderColor: '#bae6fd',
+                bgcolor: '#f0f9ff',
+                transition: 'all 0.2s ease',
+                '&:hover': { bgcolor: '#e0f2fe', borderColor: '#0284c7', transform: 'translateY(-1px)' },
               }}
               onClick={() => handleQuickDemo('Admin')}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <AdminPanelSettingsIcon color="primary" />
+                <AdminPanelSettingsIcon sx={{ color: '#0284c7', fontSize: 28 }} />
                 <Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                    Tài khoản Quản trị viên (Admin)
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#0369a1' }}>
+                    Quản trị viên Hệ thống (Admin)
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#64748b' }}>
-                    Quyền tối cao toàn bệnh viện
+                  <Typography variant="caption" sx={{ color: '#64748b', display: 'block' }}>
+                    Toàn quyền: Cấp phát IP tĩnh, Quản trị mạng, Phân quyền
                   </Typography>
                 </Box>
               </Box>
-              <Button size="small" variant="text" color="primary">
-                Chọn
+              <Button size="small" variant="contained" color="primary" sx={{ fontSize: '0.75rem', fontWeight: 700 }}>
+                Vào ngay
               </Button>
             </Paper>
 
+            {/* Nút 2: EquipmentManager Khoa Khám Bệnh */}
             <Paper
               variant="outlined"
               sx={{
@@ -186,26 +266,66 @@ export const LoginPage: React.FC = () => {
                 justifyContent: 'space-between',
                 borderRadius: 2,
                 cursor: 'pointer',
-                '&:hover': { bgcolor: '#ecfdf5', borderColor: '#34d399' },
+                borderColor: '#e2e8f0',
+                transition: 'all 0.2s ease',
+                '&:hover': { bgcolor: '#f8fafc', borderColor: '#059669', transform: 'translateY(-1px)' },
               }}
               onClick={() => handleQuickDemo('EquipmentManager', 'DEP-KCB')}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <ManageAccountsIcon color="secondary" />
+                <ManageAccountsIcon sx={{ color: '#059669', fontSize: 28 }} />
                 <Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                    Quản lý Thiết bị (EquipmentManager)
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>
+                    Quản lý Khoa Khám Bệnh & Dược
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#64748b' }}>
-                    Phụ trách Khoa Khám Bệnh & Dược
+                  <Typography variant="caption" sx={{ color: '#64748b', display: 'block' }}>
+                    Phạm vi: DEP-KCB (Quét QR, Xem IP, Báo hỏng thiết bị)
                   </Typography>
                 </Box>
               </Box>
-              <Button size="small" variant="text" color="secondary">
+              <Button size="small" variant="outlined" color="success" sx={{ fontSize: '0.75rem', fontWeight: 700 }}>
+                Chọn
+              </Button>
+            </Paper>
+
+            {/* Nút 3: EquipmentManager Khoa Phục Hồi Chức Năng */}
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 1.5,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                borderRadius: 2,
+                cursor: 'pointer',
+                borderColor: '#e2e8f0',
+                transition: 'all 0.2s ease',
+                '&:hover': { bgcolor: '#f8fafc', borderColor: '#059669', transform: 'translateY(-1px)' },
+              }}
+              onClick={() => handleQuickDemo('EquipmentManager', 'DEP-PHCN')}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <ManageAccountsIcon sx={{ color: '#059669', fontSize: 28 }} />
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>
+                    Quản lý Khoa Phục hồi chức năng
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#64748b', display: 'block' }}>
+                    Phạm vi: DEP-PHCN (Giám sát & Quét mã QR chuyên khoa)
+                  </Typography>
+                </Box>
+              </Box>
+              <Button size="small" variant="outlined" color="success" sx={{ fontSize: '0.75rem', fontWeight: 700 }}>
                 Chọn
               </Button>
             </Paper>
           </Stack>
+
+          <Box sx={{ mt: 3, textAlign: 'center' }}>
+            <Typography variant="caption" sx={{ color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
+              <SecurityIcon sx={{ fontSize: 14 }} /> Hệ thống bảo mật tiêu chuẩn Bệnh viện & Y tế số
+            </Typography>
+          </Box>
         </CardContent>
       </Card>
     </Box>

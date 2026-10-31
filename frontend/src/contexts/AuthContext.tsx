@@ -5,7 +5,7 @@ import {
   onAuthStateChanged,
   User as FirebaseUser,
 } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
 import { INITIAL_USERS } from '../services/mockHospitalData';
 import { logActivity } from '../services/activityLogService';
@@ -29,9 +29,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(() => {
-    // Mặc định đăng nhập với tài khoản Quản trị viên Bệnh viện
     const cached = localStorage.getItem('hosp_current_user_profile');
-    return cached ? JSON.parse(cached) : INITIAL_USERS[0];
+    return cached ? JSON.parse(cached) : null;
   });
   const [loading, setLoading] = useState(false);
 
@@ -45,6 +44,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const data = docSnap.data() as UserProfile;
             setUserProfile(data);
             localStorage.setItem('hosp_current_user_profile', JSON.stringify(data));
+          } else {
+            // Tự động gán profile Admin nếu email có admin
+            const isDefaultAdmin = fbUser.email?.toLowerCase().includes('admin') || false;
+            const newProf: UserProfile = {
+              id: fbUser.uid,
+              email: fbUser.email || '',
+              displayName: fbUser.displayName || (isDefaultAdmin ? 'Quản trị viên Hệ thống' : 'Cán bộ Quản lý Thiết bị'),
+              role: isDefaultAdmin ? 'Admin' : 'EquipmentManager',
+              departmentIds: isDefaultAdmin ? [] : ['DEP-KCB', 'DEP-PHCN'],
+              isActive: true,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+            setUserProfile(newProf);
+            localStorage.setItem('hosp_current_user_profile', JSON.stringify(newProf));
+            try {
+              await setDoc(doc(db, 'users', fbUser.uid), newProf);
+            } catch (err) {
+              console.warn('Lỗi ghi doc user:', err);
+            }
           }
         } catch (e) {
           console.warn('Lỗi lấy user profile từ Firestore:', e);
@@ -75,6 +94,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUserProfile(prof);
         localStorage.setItem('hosp_current_user_profile', JSON.stringify(prof));
         await logActivity(prof, 'LOGIN', 'AUTH', `Đăng nhập hệ thống qua Firebase Auth`);
+      } else {
+        const isDefaultAdmin = email.toLowerCase().includes('admin');
+        const newProf: UserProfile = {
+          id: cred.user.uid,
+          email: cred.user.email || email,
+          displayName: cred.user.displayName || (isDefaultAdmin ? 'Quản trị viên Hệ thống (Admin)' : 'Cán bộ Quản lý Thiết bị'),
+          role: isDefaultAdmin ? 'Admin' : 'EquipmentManager',
+          departmentIds: isDefaultAdmin ? [] : ['DEP-KCB', 'DEP-PHCN'],
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        try {
+          await setDoc(doc(db, 'users', cred.user.uid), newProf);
+        } catch (e) {
+          console.warn('Lưu user mới vào Firestore:', e);
+        }
+        setUserProfile(newProf);
+        localStorage.setItem('hosp_current_user_profile', JSON.stringify(newProf));
+        await logActivity(newProf, 'LOGIN', 'AUTH', `Đăng nhập khởi tạo qua Firebase Auth`);
       }
     } finally {
       setLoading(false);

@@ -2,7 +2,7 @@ import type { IpAddressStatus } from '../types';
 
 /**
  * TIỆN ÍCH TÍNH TOÁN & VALIDATION IP VÀ SUBNET (IPAM)
- * Bệnh viện Phục hồi chức năng Đồng Tháp
+ * Bệnh viện Phục hồi chức năng
  */
 
 // Chuyển đổi IPv4 string sang số nguyên 32-bit (unsigned)

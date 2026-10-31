@@ -2,6 +2,8 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from '../layouts/MainLayout';
 import { RoleGuard } from '../components/common/RoleGuard';
+import { AuthGuard } from '../components/common/AuthGuard';
+import { useAuth } from '../contexts/AuthContext';
 
 // Pages
 import { LoginPage } from '../pages/auth/LoginPage';
@@ -28,12 +30,25 @@ import { IpAssignmentPage } from '../pages/ipam/IpAssignmentPage';
 import { IpHistoryPage } from '../pages/ipam/IpHistoryPage';
 
 export const AppRoutes: React.FC = () => {
+  const { userProfile } = useAuth();
+
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      {/* Route Đăng nhập (Nếu đã login thì điều hướng về Dashboard) */}
+      <Route
+        path="/login"
+        element={userProfile ? <Navigate to="/" replace /> : <LoginPage />}
+      />
 
-      {/* Main App Layout */}
-      <Route path="/" element={<MainLayout />}>
+      {/* Main App Layout (Được bảo vệ bởi AuthGuard - chưa đăng nhập bắt buộc vào /login) */}
+      <Route
+        path="/"
+        element={
+          <AuthGuard>
+            <MainLayout />
+          </AuthGuard>
+        }
+      >
         {/* Dashboard chung (tự động phân quyền hiển thị theo role) */}
         <Route index element={<DashboardPage />} />
 

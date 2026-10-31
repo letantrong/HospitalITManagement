@@ -112,26 +112,40 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <Box>
-      {/* Header Banner */}
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a' }}>
+      {/* Header Banner - Bố cục cân đối chuyên nghiệp */}
+      <Paper
+        elevation={0}
+        sx={{
+          mb: 3,
+          p: { xs: 2, sm: 2.5 },
+          borderRadius: 2.5,
+          border: '1px solid #e2e8f0',
+          bgcolor: '#ffffff',
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', md: 'center' },
+          gap: 2,
+        }}
+      >
+        <Box sx={{ textAlign: 'left' }}>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a', textAlign: 'left', lineHeight: 1.2 }}>
             {isAdmin ? 'BẢNG ĐIỀU KHIỂN QUẢN TRỊ BỆNH VIỆN' : 'BẢNG ĐIỀU KHIỂN QUẢN LÝ THIẾT BỊ KHOA PHÒNG'}
           </Typography>
-          <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5 }}>
+          <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5, textAlign: 'left' }}>
             {isAdmin
-              ? 'Giám sát toàn diện hạ tầng công nghệ thông tin tại Bệnh viện Phục hồi chức năng Đồng Tháp'
+              ? 'Giám sát toàn diện hạ tầng công nghệ thông tin tại Bệnh viện Phục hồi chức năng'
               : `Phạm vi giám sát: ${userProfile?.departmentIds?.join(', ') || 'Khoa được phân công'}`}
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
           <Button
             variant="contained"
             color="primary"
             startIcon={<QrCodeScannerIcon />}
             onClick={() => navigate('/qr-scanner')}
-            sx={{ fontWeight: 600 }}
+            sx={{ fontWeight: 600, px: 2.5, py: 1 }}
           >
             Quét mã QR kiểm tra
           </Button>
@@ -140,13 +154,13 @@ export const DashboardPage: React.FC = () => {
               variant="outlined"
               color="primary"
               onClick={() => navigate('/devices')}
-              sx={{ fontWeight: 600 }}
+              sx={{ fontWeight: 600, px: 2.5, py: 1 }}
             >
               Quản lý thiết bị
             </Button>
           )}
         </Box>
-      </Box>
+      </Paper>
 
       {/* 4 Thẻ KPI chính */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
@@ -247,54 +261,67 @@ export const DashboardPage: React.FC = () => {
 
       {/* Biểu đồ Phân tích */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={7}>
+        <Grid item xs={12} md={6}>
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2, color: '#0f172a' }}>
                 Phân bố Thiết bị theo Khoa / Phòng ban
               </Typography>
               <Box sx={{ height: 280, width: '100%' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={deptChartData} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
-                    <XAxis dataKey="name" stroke="#64748b" fontSize={12} />
-                    <YAxis stroke="#64748b" fontSize={12} />
-                    <ChartTooltip
-                      formatter={(val: any, _: any, item: any) => [`${val} thiết bị`, item.payload.fullName]}
-                    />
-                    <Bar dataKey="devices" fill="#0284c7" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+                {deptChartData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={deptChartData} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
+                      <XAxis dataKey="name" stroke="#64748b" fontSize={12} />
+                      <YAxis stroke="#64748b" fontSize={12} />
+                      <ChartTooltip
+                        formatter={(val: any, _: any, item: any) => [`${val} thiết bị`, item?.payload?.fullName || '']}
+                      />
+                      <Bar dataKey="devices" fill="#0284c7" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+                    Chưa có thiết bị phân bố tại khoa phòng này
+                  </Box>
+                )}
               </Box>
             </CardContent>
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={5}>
+        <Grid item xs={12} md={6}>
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2, color: '#0f172a' }}>
                 Tình trạng Vận hành Thiết bị
               </Typography>
               <Box sx={{ height: 280, width: '100%' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={conditionData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={85}
-                      label={({ name, percent }: any) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {conditionData.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Legend />
-                    <ChartTooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+                {conditionData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={conditionData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="45%"
+                        innerRadius={50}
+                        outerRadius={75}
+                        paddingAngle={3}
+                      >
+                        {conditionData.map((_, index) => (
+                          <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <ChartTooltip formatter={(value: any, name: any) => [`${value} thiết bị`, name]} />
+                      <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.8rem' }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+                    Chưa có dữ liệu tình trạng thiết bị
+                  </Box>
+                )}
               </Box>
             </CardContent>
           </Card>
@@ -303,7 +330,7 @@ export const DashboardPage: React.FC = () => {
 
       {/* Danh sách thiết bị và Phiếu bảo trì gần đây */}
       <Grid container spacing={2.5}>
-        <Grid item xs={12} md={7}>
+        <Grid item xs={12} md={6}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -350,7 +377,7 @@ export const DashboardPage: React.FC = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={5}>
+        <Grid item xs={12} md={6}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>

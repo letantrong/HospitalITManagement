@@ -138,7 +138,7 @@ export const DepartmentPage: React.FC = () => {
             QUẢN LÝ KHOA / PHÒNG BAN CHỨC NĂNG
           </Typography>
           <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5 }}>
-            Thiết lập danh mục cơ cấu tổ chức tại Bệnh viện Phục hồi chức năng Đồng Tháp
+            Thiết lập danh mục cơ cấu tổ chức tại Bệnh viện Phục hồi chức năng
           </Typography>
         </Box>
 

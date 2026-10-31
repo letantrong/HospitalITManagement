@@ -335,7 +335,7 @@ export const DeviceDetailPage: React.FC = () => {
               <img src="${qrDataUrl}" />
             </div>
             <div class="info-box">
-              <div class="hospital-title">BV PHCN ĐỒNG THÁP</div>
+              <div class="hospital-title">BV PHỤC HỒI CHỨC NĂNG</div>
               <div class="device-code">${device.deviceCode}</div>
               <div class="device-name">${device.name}</div>
               <div>Khoa: ${device.departmentName}</div>
